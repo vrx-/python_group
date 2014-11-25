@@ -1,25 +1,6 @@
 #!/usr/bin/env python
 #plt.ion()
 
-from netCDF4 import Dataset
-from mpl_toolkits.basemap import Basemap
-import numpy as np
-import matplotlib.pyplot as plt
-
-PATH='sst_xyt_dy.cdf'
-
-
-data=Dataset(PATH)
-
-lat=data.variables['lat'][:] #degrees_north
-lon=data.variables['lon'][:] #degrees_east
-time=data.variables['time'][:] # Centered Time
-
-T=data.variables['T_20'][:,0,:,:] #TEMPERATURE degree_C
-ST=data.variables['ST_6020'][:,0,:,:] #TEMPERATURE SOURCE
-QT=data.variables['QT_5020'][:,0,:,:] #TEMPERATURE QUALITY 
-
-
 '''
 QT (Quality Codes): 
 0=missing data
@@ -40,10 +21,34 @@ ST (Source Codes):
 7 = Temporally Interpolated from RAM
 '''
 
-#only "good data"
-tq=np.ma.masked_where(QT>3, T)
-tq=np.ma.masked_where(QT==0, tq)
 
+from netCDF4 import Dataset
+from mpl_toolkits.basemap import Basemap
+import numpy as np
+import matplotlib.pyplot as plt
+from datetime import datetime, timedelta
+
+# load the data
+PATH='sst_xyt_dy.cdf'
+
+data=Dataset(PATH)
+
+#define dimensions
+lat=data.variables['lat'][:] #degrees_north
+lon=data.variables['lon'][:] #degrees_east
+time=data.variables['time'][:] # Centered Time
+
+TIME = [datetime(1979,1,20,12,0,0)+int(i)*timedelta(days=1) for i in time]
+
+#define variables
+T=data.variables['T_20'][:,0,:,:] #TEMPERATURE degree_C
+ST=data.variables['ST_6020'][:,0,:,:] #TEMPERATURE SOURCE
+QT=data.variables['QT_5020'][:,0,:,:] #TEMPERATURE QUALITY 
+
+#only "good data"
+tq=np.ma.masked_where((QT>3)&(QT==0), T)
+
+#map
 m = Basemap(projection='robin',
             lat_0=0,
             lon_0=-155,
@@ -53,11 +58,16 @@ fig = plt.figure(figsize=(10, 7))
 ax = fig.add_subplot(111)
 
 m.fillcontinents()
+points=np.zeros(len(time))
+for t in len(time):
+    points[t]=sum(sum(~ex.mask[t,:,:]))
 
+
+'''
 colors = np.array(['#ffffff','#00cc00','#99ff66','#ffff00','#ff9933','#ff0000'])
 x, y = m(*np.meshgrid(lon, lat))
 plt.scatter(x,y,c=colors[QT[0,:,:]])
 plt.show()
+'''
 
-#indx=np.asarray(np.where((QT>0)&(QT<3)))
 
