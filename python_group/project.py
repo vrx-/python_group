@@ -46,7 +46,7 @@ ST=data.variables['ST_6020'][:,0,:,:] #TEMPERATURE SOURCE
 QT=data.variables['QT_5020'][:,0,:,:] #TEMPERATURE QUALITY 
 
 #only "good data"
-tq=np.ma.masked_where((QT>3)&(QT==0), T)
+tq=np.ma.masked_where(QT==0, np.ma.masked_where(QT>2, T))
 
 #how many
 points=np.zeros(len(time))
@@ -61,7 +61,6 @@ m = Basemap(projection='robin',
             lat_0=0,
             lon_0=-155,
             resolution='c')
-
 
 fig2 = plt.figure(figsize=(10, 7))
 ax2 = fig2.add_subplot(111)
