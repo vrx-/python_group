@@ -52,22 +52,37 @@ tq=np.ma.masked_where(QT==0, np.ma.masked_where(QT>2, T))
 points=np.zeros(len(time))
 for t in range(len(time)):
     points[t]=sum(sum(~tq.mask[t,:,:]))
+
 fig = plt.figure(figsize=(10, 7))
 ax = fig.add_subplot(111)
-plt.plot(TIME,points)
+plt.plot(time,points)
 
 #map
 m = Basemap(projection='robin',
             lat_0=0,
             lon_0=-155,
             resolution='c')
-
-fig2 = plt.figure(figsize=(10, 7))
-ax2 = fig2.add_subplot(111)
-
 m.fillcontinents()
 
 
+#interpolation grid
+xxi,yyi=np.mgrid[np.min(lon):np.max(lon):129j,np.min(lat):np.max(lat):103j]
+zzi=np.zeros((len(time),len(xxi[:,0]),len(yyi[0,:])))
+
+for t in arange(len(time)):
+    grid= vstack((lon[np.where(tq.mask[t]==0)[1][:]],lat[np.where(tq.mask[t]==0)[0][:]])).T
+    data1=tq[t][np.where(tq.mask[t]==0)].data
+    zzi[t]=griddata(grid, data1, (xxi,yyi), method='linear')
+    zzi[t]=np.masked_where(zzi[t]==0,zzi[t])
+
+
+#ploting
+fig2 = plt.figure(figsize=(10, 7))
+ax2 = fig2.add_subplot(111)
+
+
+
+lon[np.where(tq.mask[t]==0)[1][:]].T,lat[np.where(tq.mask[t]==0)[0][:]].T
 '''
 colors = np.array(['#ffffff','#00cc00','#99ff66','#ffff00','#ff9933','#ff0000'])
 x, y = m(*np.meshgrid(lon, lat))
@@ -75,4 +90,16 @@ plt.scatter(x,y,c=colors[QT[0,:,:]])
 plt.show()
 '''
 
+t=[]
+years=np.array([(d.year) for d in TIME])
+months=np.array([(m.month) for m in TIME])
+for yy in np.unique(years)[8:-1]:
+    for mm in np.unique(months):
+        pos=np.where(((years==yy) & (months==mm)))
+#        print pos
+        t.append(pos[0][np.where(points[pos]==(points[pos].max()))[0][0]])
 
+
+indx=points[np.where((years=year & months==month))].max()
+indx=np.where(years==year)
+        
