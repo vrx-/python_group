@@ -48,19 +48,25 @@ QT=data.variables['QT_5020'][:,0,:,:] #TEMPERATURE QUALITY
 #only "good data"
 tq=np.ma.masked_where((QT>3)&(QT==0), T)
 
+#how many
+points=np.zeros(len(time))
+for t in len(time):
+    points[t]=sum(sum(~ex.mask[t,:,:]))
+fig = plt.figure(figsize=(10, 7))
+ax = fig.add_subplot(111)
+plt.plot(TIME,points)
+
 #map
 m = Basemap(projection='robin',
             lat_0=0,
             lon_0=-155,
             resolution='c')
 
-fig = plt.figure(figsize=(10, 7))
-ax = fig.add_subplot(111)
+
+fig2 = plt.figure(figsize=(10, 7))
+ax2 = fig2.add_subplot(111)
 
 m.fillcontinents()
-points=np.zeros(len(time))
-for t in len(time):
-    points[t]=sum(sum(~ex.mask[t,:,:]))
 
 
 '''
