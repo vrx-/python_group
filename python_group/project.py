@@ -50,8 +50,8 @@ tq=np.ma.masked_where(QT==0, np.ma.masked_where(QT>2, T))
 
 #how many
 points=np.zeros(len(time))
-for t in len(time):
-    points[t]=sum(sum(~ex.mask[t,:,:]))
+for t in range(len(time)):
+    points[t]=sum(sum(~tq.mask[t,:,:]))
 fig = plt.figure(figsize=(10, 7))
 ax = fig.add_subplot(111)
 plt.plot(TIME,points)
